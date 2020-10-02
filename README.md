@@ -47,6 +47,9 @@ The options are endless and there is no wrong answer. This is all for fun, so tr
 Looking for a challenge?
 We have left the original code which was written in Python 2 under the `example/make_art_python2.py` file. See what happens when you run it with Python 3. See all of the errors? Can you fix it so it works with python 3? The answer is with the `example/make_art.py` file which is written in Python 3.
 
+### CLI
+> Run the program with --help, ie: `python3 community-version.py --help` to see the supported arguments.
+
 **All discussions around this event can now be had in our #hacktoberfest-2020 channel on Discord!**
 
 ## Disclaimer
