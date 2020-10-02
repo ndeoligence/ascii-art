@@ -1,15 +1,15 @@
-#code credit goes to: https://www.hackerearth.com/practice/notes/beautiful-python-a-simple-ascii-art-generator-from-images/
-#code modified to work with Python 3 by @aneagoie
-from PIL import Image
+#!/usr/bin/env python3
+# code credit goes to:
+#   https://www.hackerearth.com/practice/notes/beautiful-python-a-simple-ascii-art-generator-from-images/
+# code modified to work with Python 3 by @aneagoie
 
-help_msg = """
-Usage  : python community-version.py [option] [input_file]
-Options:
-         no options will run the default ASCII_CHARS
-    -r   reverse the ASCII_CHARS
-    -s   save the output to file (by default the output file is [input_file]_output.txt)
-    -rs  save the reversed output to file
-"""
+import sys
+import os
+from PIL import Image
+import click
+
+ASCII_CHARS = ['#', '?', '%', '.', 'S', '+', '.', '*', ':', ',', '@']
+SUPPORTED_IMAGE_TYPES = ['.png']
 
 
 def scale_image(image, new_width=100):
@@ -22,27 +22,32 @@ def scale_image(image, new_width=100):
     new_image = image.resize((new_width, new_height))
     return new_image
 
+
 def convert_to_grayscale(image):
     return image.convert('L')
 
-def map_pixels_to_ascii_chars(image, range_width=25):
+
+def map_pixels_to_ascii_chars(image, reverse, range_width=25):
     """Maps each pixel to an ascii char based on the range
     in which it lies.
 
     0-255 is divided into 11 ranges of 25 pixels each.
     """
 
+    # We make a copy on reverse so we don't modify the global array.
+    ascii_chars = ASCII_CHARS if not reverse else ASCII_CHARS[::-1]
+
     pixels_in_image = list(image.getdata())
-    pixels_to_chars = [ASCII_CHARS[int(pixel_value/range_width)] for pixel_value in
-            pixels_in_image]
+    pixels_to_chars = [ascii_chars[int(pixel_value/range_width)] for pixel_value in pixels_in_image]
 
     return "".join(pixels_to_chars)
 
-def convert_image_to_ascii(image, new_width=100):
+
+def convert_image_to_ascii(image, reverse=False, new_width=100):
     image = scale_image(image)
     image = convert_to_grayscale(image)
 
-    pixels_to_chars = map_pixels_to_ascii_chars(image)
+    pixels_to_chars = map_pixels_to_ascii_chars(image, reverse)
     len_pixels_to_chars = len(pixels_to_chars)
 
     image_ascii = [pixels_to_chars[index: index + new_width] for index in
@@ -50,75 +55,65 @@ def convert_image_to_ascii(image, new_width=100):
 
     return "\n".join(image_ascii)
 
-def handle_image_conversion(image_filepath, arg=""):
-    image = None
+
+def handle_image_conversion(image_filepath, reverse):
     try:
         image = Image.open(image_filepath)
     except Exception as e:
         print(f"Unable to open image file {image_filepath}.")
         print(e)
-        return
+        return None
 
-    image_ascii = convert_image_to_ascii(image)
-    print(image_ascii)
+    return convert_image_to_ascii(image, reverse)
 
-    if arg == "-s":
-        output_name = image_file_path.split('.')[0] + "_output.txt" 
-        try:
-            f = open(output_name, "w")
-            f.write(image_ascii)
-            f.close
-            print(f"Image saved to -> {output_name}")
-        except:
-            print("An error occured!")
-            return False
 
-def check_file(f):
-    allowed_inputs_file = ["png"]
+def write_file(ascii, filename):
+    if not ascii or not filename:
+        return False
     try:
-        if f.split('.')[-1] in allowed_inputs_file:
+        with open(filename, "w") as f:
+            f.write(ascii)
+            print(f"Image saved to -> {filename}")
             return True
-        else:
-            return False
     except:
-        print(help_msg)
+        print("An error occured!")
         return False
 
-def check_inputs():
-    arguments = [x for x in sys.argv]
-    if 2 > len(arguments) or len(arguments) > 3 or check_file(arguments[-1]) == False:
-        print(help_msg)
-        return False
-    elif len(arguments) == 2 and check_file(arguments[-1]):
-        return ""
-    elif len(arguments) == 3 and arguments[1] == "-r" and check_file(arguments[-1]):
-        return arguments[1]
-    elif len(arguments) == 3 and arguments[1] == "-s" and check_file(arguments[-1]):
-        return arguments[1]
-    elif len(arguments) == 3 and arguments[1] == "-rs" and check_file(arguments[-1]):
-        return arguments[1]
+
+def output_name(input):
+    if not input:
+        return 'output.txt'
+    return f"{os.path.splitext(input)[0]}_output.txt"
 
 
-if __name__=='__main__':
-    import sys
-    todo = check_inputs()
-    ASCII_CHARS = [ '#', '?', '%', '.', 'S', '+', '.', '*', ':', ',', '@']
+def check_file(path):
+    _, ext = os.path.splitext(path)
+    if ext.lower() not in SUPPORTED_IMAGE_TYPES:
+        print(f"{path} is not supported")
+        print("Supported file types: ", end='')
+        print(', '.join(SUPPORTED_IMAGE_TYPES))
+        sys.exit(1)
 
-    if todo == "":
-        image_file_path = sys.argv[1]
-        print(image_file_path)
-        handle_image_conversion(image_file_path)
-    elif todo == '-r':
-        ASCII_CHARS = [ '#', '?', '%', '.', 'S', '+', '.', '*', ':', ',', '@'][::-1]
-        image_file_path = sys.argv[2]
-        print(image_file_path)
-        handle_image_conversion(image_file_path)
-    elif todo == "-s":
-        image_file_path = sys.argv[2]
-        print(image_file_path)
-        handle_image_conversion(image_file_path, "-s")
-    elif todo == "-rs":
-        ASCII_CHARS = [ '#', '?', '%', '.', 'S', '+', '.', '*', ':', ',', '@'][::-1]
-        image_file_path = sys.argv[2]
-        print(image_file_path)
-        handle_image_conversion(image_file_path, "-s")
+
+@click.command()
+@click.argument('input_file', type=click.Path(exists=True))
+@click.option('-r', '--reverse', is_flag=True, help='reverse the ASCII_CHARS')
+@click.option('-s', '--save', is_flag=True,
+              help='save the output to file (by default the output file is [input_file]_output.txt)')
+@click.option('-o', '--output', default=None, type=click.Path(),
+              help='Specify the name of the output file instead of using the default. -s is implied.')
+def main(input_file, reverse, save, output):
+    check_file(input_file)
+    save = save or (output is not None)
+    if save and not output:
+        output = output_name(input_file)
+    ascii_str = handle_image_conversion(input_file, reverse)
+
+    if save:
+        write_file(ascii_str, output)
+    else:
+        print(ascii_str)
+
+
+if __name__ == '__main__':
+    main()
