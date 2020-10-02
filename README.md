@@ -10,7 +10,7 @@ Welcome to this years Python challenge for Hacktoberfest ([What is Hacktoberfest
 
 
 ## How to get Started:
-In order to get started on this project, it is recommended that you watch the section on **Scripting** in the [Python course](https://academy.zerotomastery.io/p/complete-python-developer-zero-to-mastery?utm_source=github&utm_campaign=ascii-art-hf20). We talk about ```sys.argv``` and ```Pillow``` library (Image processing) in that section which would help you!
+In order to get started on this project, it is recommended that you watch the section on **Scripting** in the [Python course](https://academy.zerotomastery.io/p/complete-python-developer-zero-to-mastery?utm_source=github&utm_campaign=ascii-art-hf20). We talk about ```sys.argv``` and ```Pillow```(https://pillow.readthedocs.io/en/stable/) library (Image processing) in that section which would help you!
 
 > If you've never made a pull request before, or participated in an open-source project, we recommend taking a look at our [Start Here Guidelines](https://github.com/zero-to-mastery/start-here-guidelines). This repo has everything you need to learn about open-source, with a step-by-step guide to making your very first PR.
 > Once you've got your feet wet, you're ready to come back and dive into Hacktoberfest fun!
@@ -22,11 +22,14 @@ In order to get started on this project, it is recommended that you watch the se
     - `git remote add upstream https://github.com/zero-to-mastery/ascii-art.git`
     - `git pull upstream master`
     - The above 2 commands will synchronize your forked version of the project with the actual repository.
-4. Make sure you have [Python 3](https://www.python.org/downloads/) installed on your machine.
+4. Make sure you have Python 3 installed on your machine
 5. Install required libraries:
     - [Pillow](https://pillow.readthedocs.io/en/stable/installation.html)
     - [Click](https://pypi.org/project/click/) (to run `community-version.py`)
     > If using pip, you can install the libraries by running: `$ pip install pip install -r requirements.txt`
+    ```bash
+    pip install -r requirements.txt
+    ```
 6. Run the  example code with the command: `python3 example/make_art.py ztm-logo.png`
 7. Stare with amazement 😮
 
