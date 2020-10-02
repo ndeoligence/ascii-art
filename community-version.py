@@ -12,7 +12,7 @@ ASCII_CHARS = ['#', '?', '%', '.', 'S', '+', '.', '*', ':', ',', '@']
 SUPPORTED_IMAGE_TYPES = ['.png']
 
 
-def scale_image(image, new_width=100):
+def scale_image(image, new_width):
     """Resizes an image preserving the aspect ratio.
     """
     (original_width, original_height) = image.size
@@ -34,7 +34,7 @@ def map_pixels_to_ascii_chars(image, reverse, range_width=25):
     0-255 is divided into 11 ranges of 25 pixels each.
     """
 
-    # We make a copy on reverse so we don't modify the global array.
+    # We make a local copy on reverse so we don't modify the global array.
     ascii_chars = ASCII_CHARS if not reverse else ASCII_CHARS[::-1]
 
     pixels_in_image = list(image.getdata())
@@ -43,8 +43,10 @@ def map_pixels_to_ascii_chars(image, reverse, range_width=25):
     return "".join(pixels_to_chars)
 
 
-def convert_image_to_ascii(image, reverse=False, new_width=100):
-    image = scale_image(image)
+def convert_image_to_ascii(image, reverse=False, new_width=None):
+    if not new_width:
+        new_width = image.width
+    image = scale_image(image, new_width)
     image = convert_to_grayscale(image)
 
     pixels_to_chars = map_pixels_to_ascii_chars(image, reverse)
@@ -56,7 +58,7 @@ def convert_image_to_ascii(image, reverse=False, new_width=100):
     return "\n".join(image_ascii)
 
 
-def handle_image_conversion(image_filepath, reverse):
+def handle_image_conversion(image_filepath, reverse, width):
     try:
         image = Image.open(image_filepath)
     except Exception as e:
@@ -64,7 +66,7 @@ def handle_image_conversion(image_filepath, reverse):
         print(e)
         return None
 
-    return convert_image_to_ascii(image, reverse)
+    return convert_image_to_ascii(image, reverse, width)
 
 
 def write_file(ascii, filename):
@@ -102,12 +104,14 @@ def check_file(path):
               help='save the output to file (by default the output file is [input_file]_output.txt)')
 @click.option('-o', '--output', default=None, type=click.Path(),
               help='Specify the name of the output file instead of using the default. -s is implied.')
-def main(input_file, reverse, save, output):
+@click.option('-w', '--width', default=100, type=int,
+              help='scale the image to fit a custom width')
+def main(input_file, reverse, save, output, width):
     check_file(input_file)
     save = save or (output is not None)
     if save and not output:
         output = output_name(input_file)
-    ascii_str = handle_image_conversion(input_file, reverse)
+    ascii_str = handle_image_conversion(input_file, reverse, width)
 
     if save:
         write_file(ascii_str, output)
