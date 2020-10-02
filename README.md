@@ -23,7 +23,10 @@ In order to get started on this project, it is recommended that you watch the se
     - `git pull upstream master`
     - The above 2 commands will synchronize your forked version of the project with the actual repository.
 4. Make sure you have Python 3 installed on your machine
-5. Install [Pillow library](https://pillow.readthedocs.io/en/stable/installation.html)
+5. Install required libraries:
+    - [Pillow](https://pillow.readthedocs.io/en/stable/installation.html)
+    - [Click](https://pypi.org/project/click/) (to run `community-version.py`)
+    > If using pip, you can install the libraries by running: `$ pip install pip install -r requirements.txt`
 6. Run the  example code with the command: `python3 example/make_art.py ztm-logo.png`
 5. Stare with amazement 😮
 

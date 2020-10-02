@@ -3,6 +3,7 @@
 # code credit goes to: https://www.hackerearth.com/practice/notes/beautiful-python-a-simple-ascii-art-generator-from-images/
 # code modified to work with Python 3 by @aneagoie
 from PIL import Image
+import click
 
 ASCII_CHARS = ['#', '?', '%', '.', 'S', '+', '.', '*', ':', ',', '@']
 
@@ -49,30 +50,33 @@ def convert_image_to_ascii(image, new_width=100):
     return "\n".join(image_ascii)
 
 
-def write_image_to_text_file(image_ascii):
-    with open("ascii_image.txt", "w") as f:
+def write_image_to_text_file(image_ascii, filename):
+    with open(filename, "w") as f:
         f.write(image_ascii)
 
 
-def handle_image_conversion(image_filepath, save):
+def handle_image_conversion(image_filepath):
+    import sys
     try:
         image = Image.open(image_filepath)
+        return convert_image_to_ascii(image)
     except Exception as e:
         print(f"Unable to open image file {image_filepath}.")
         print(e)
-        return
+        sys.exit(1)
 
-    image_ascii = convert_image_to_ascii(image)
-    print(image_ascii)
-    if save == 1:
-        write_image_to_text_file(image_ascii)
+
+@click.command()
+@click.argument('image_path', type=click.Path())
+@click.option('-w', '--write', is_flag=True, help='Save the ascii to a text file')
+@click.option('-o', '--output', default='ascii_image.txt', type=click.Path(), help='Output file for ascii')
+def process(image_path, write, output):
+    ascii = handle_image_conversion(image_path)
+    if write:
+        write_image_to_text_file(ascii, output)
+    else:
+        print(ascii)
 
 
 if __name__ == '__main__':
-    import sys
-
-    image_file_path = sys.argv[1]
-    if sys.argv[2]:
-        handle_image_conversion(image_file_path, 1)
-    print(image_file_path)
-    handle_image_conversion(image_file_path, 0)
+    process()
